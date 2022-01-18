@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
+import java.util.List;
 
 import br.lorandi.entidades.Filme;
 import br.lorandi.entidades.Locacao;
@@ -16,35 +17,46 @@ import br.lorandi.exception.UsuarioSemNomeValido;
 
 public class LocacaoService {
 
+    public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws FilmeSemEstoqueException, UsuarioSemNomeValido, FilmePrecisaTerUmNome, EntidadeNullException {
 
-    public Locacao alugarFilme(Usuario usuario, Filme filme) throws FilmeSemEstoqueException, UsuarioSemNomeValido, FilmePrecisaTerUmNome, EntidadeNullException {
+        Locacao locacao = new Locacao();
 
-        if (usuario == null){
+        Double valorTotal = 0.0;
+
+        if (usuario == null) {
             throw new EntidadeNullException("Usuário é null");
 
         }
 
-        if (filme == null){
+        if (filmes == null || filmes.isEmpty()) {
             throw new EntidadeNullException("Filme é null");
         }
 
-        if( filme.getEstoque() == 0){
-            throw new FilmeSemEstoqueException("Filme sem estoque");
+        for (Filme filme : filmes) {
+            if (filme.getEstoque() == 0) {
+                throw new FilmeSemEstoqueException("Filme sem estoque");
+            }
+
+            if (filme.getNome().equals("")) {
+                throw new FilmePrecisaTerUmNome("Filme precisa ter um nome");
+            }
+
+            locacao.getFilmes();
+
+            valorTotal += filme.getPrecoLocacao();
+
         }
 
-        if(usuario.getNome() == null || usuario.getNome().equals("")){
+
+        if (usuario.getNome() == null || usuario.getNome().equals("")) {
             throw new UsuarioSemNomeValido("Usuario deve ter nome válido");
         }
 
-        if( filme.getNome().equals("")){
-            throw new FilmePrecisaTerUmNome("Filme precisa ter um nome");
-        }
-
-        Locacao locacao = new Locacao();
-        locacao.setFilme(filme);
+        locacao.setFilmes(filmes);
         locacao.setUsuario(usuario);
         locacao.setDataLocacao(new Date());
-        locacao.setValor(filme.getPrecoLocacao());
+        locacao.setValor(valorTotal);
+
 
 
         //Entrega no dia seguinte
